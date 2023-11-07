@@ -1,0 +1,185 @@
+---
+title: 'TidyVerse: ggplot2'
+author: "Kristin Lussi"
+date: "2023-11-12"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+TidyVerse is a set of packages that share common data representations and API design. There are several packages in TidyVerse, such as ggplot2, dplyr, tidyr, readr, and several more. In this vignette, we will look at a few capabilities of the ggplot2 package using the student stress factors data from Kaggle.
+
+### Load Packages
+
+```{r, warning = FALSE, message = FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+### Load Data
+
+We are working with a data set called "Student Stress Factors" from Kaggle. 
+
+```{r, message = FALSE, warning = FALSE}
+url <- "https://raw.githubusercontent.com/kristinlussi/FALL2023TIDYVERSE/main/Student%20Stress%20Factors.csv"
+
+stress_factors <- read_csv(url, show_col_types = FALSE) %>%
+  as.data.frame()
+
+colnames(stress_factors) <- c("TimeStamp", "SleepQuality", "HeadacheFrequency", "AcademicPerformance", "StudyLoad", "ExtracurricularTimesPerWeek", "StressLevel")
+
+head(stress_factors)
+```
+
+We will first need to create a data frame that will be easier to work with in ggplot2. 
+
+```{r}
+counts <- stress_factors %>%
+  # pivot the factor columns into one column named "Type" with the values being the ranks
+  pivot_longer(cols = c(SleepQuality, HeadacheFrequency, AcademicPerformance, StudyLoad, ExtracurricularTimesPerWeek, StressLevel), names_to = "Type", values_to = "Rank") %>%
+  group_by(Type, Rank)
+```
+
+## Plots
+
+### Bar Plot
+
+Bar plots are useful for displaying categorical or discrete variables. In this section, we will demonstrate how to use ggplot2 to make a bar plot. Using the stress factor data, we will make a bar plot showing the counts of each rank grouped by category. 
+
+The following code will produce a bar graph using ggplot2:
+
+```{r}
+# call ggplot
+ggplot(data = counts, aes(x = Type, fill = Rank, group = Rank)) +
+  # specify _bar graph
+  geom_bar(position = "dodge") +
+  # specify the title
+  ggtitle("Rank Frequency for Each Stress Factor") +
+  # specify the x label
+  xlab("Stress Factor") +
+  # specify the y label
+  ylab("Count") +
+  # center title
+  theme(plot.title = element_text(hjust = 0.5),
+        # title x categorical labels 45 degrees
+        axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+In the above code, there are a few aesthetics called in the ggplot() function.
+
+- "data" is set equal to "counts" to specify that we want to use the "counts" data frame
+- aes() is short for "aesthetics". This function is used to define how variables in the dataset are mapped to visual properties of the plot
+- "fill =" is set equal to the "Rank" variable. The "fill" aesthetic is used to assign colors or patterns to different groups or categories
+- "group =" is set equal to the "Rank" variable. The "group" aesthetic is used to group data points by the "Rank" variable (e.g. to create separate dodge positions for each rank)
+
+The following aesthetic is called in the geom_bar() function:
+
+- "position =" is set equal to "dodge" to show the different groups side-by-side. There are several positions that can be called in ggplot such as stack, jitter, identity_dodge, etc...
+
+### Violin Plot
+
+In this section, we will demonstrate how to create a violin plot in ggplot2. Violin plots are useful when you want to observe the distribution of numeric data, especially whe you want to compare the distribution of different groups. 
+
+The following code will produce a violin plot:
+
+```{r}
+ggplot(data = counts, aes(x = Type, y = Rank, fill = Type)) + 
+  # specify that we want to create a violin plot
+  geom_violin() +
+  # specify title
+  ggtitle("Rank Distribution for Each Stress Factor") +
+  # specify x axis label
+  xlab("Stress Factor") +
+  # specify y axis label
+  ylab("Rank") +
+  # center title
+  theme(plot.title = element_text(hjust = 0.5),
+      # title x categorical labels 45 degrees
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      # remove legend
+      legend.position = "none") 
+```
+
+Similarly to the bar plot, the following aesthetics are called in the ggplot() function:
+
+- "data" is set equal to "counts" data to specify that we want to use the "counts" data frame
+- aes() is called and within the aes() function "x", "y", and "fill" are specified
+
+### Density Plot
+
+In this section, we will demonstrate how to create a density plot in ggplot2. Density plots are useful for visualizing the distribution of continuous data.
+
+```{r}
+ggplot(data = counts, aes(x = Rank, fill = Type)) +
+  # specify that we want to create a density plot
+  geom_density(alpha = 0.5) +
+  # specify title 
+  ggtitle("Distribution of Ranks for Each Stress Factor") +
+  # specify x label
+  xlab("Stress Factor") +
+  # specify y label
+  ylab("Density") +
+  # center title
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+
+The following aesthetics are called in the ggplot() function:
+
+- "data" is set equal to "counts" to specify we want to use the "counts" data frame
+- aes() contains "x = Rank" and "fill = Type" to specify that we want the different ranks on the x axis and we want different density lines for each stress factor
+
+Within the geom_density() function, "alpha" is set equal to 0.5. The "alpha" aesthetic controls the transparency of the elements in the plot. 
+
+## Plot Titles
+
+In the previous plots, we can see that there are titles, x labels, and y labels. 
+
+### Titles and Subtitles
+
+To specify a title in ggplot2, we need to use the *ggtitle()* function.
+
+To add a title and subtitle to a graph, for example, we would use the following code:
+
+*ggtitle("Title", "Subtitle")*
+
+To change positioning of the above items, we can use the *theme()* function with the following aesthetics:
+
+- to center the title: *plot.title = element_text(hjust = 0.5)*
+- to center the subtitle: *plot.subtitle = element_text(hjust = 0.5)*
+
+### X and Y Labels
+
+To specify the x-label in ggplot2, we need to use the *xlab()* function.
+
+To specify the y-label in ggplot2, we need to use the *ylab()* function.
+
+To change positioning of the above items, we can use the *theme()* function with the following aesthetics:
+
+- to tilt the x-labels: *axis.text.x = element_text(angle = 45, hjust = 1)*
+
+### Legends
+
+When adding aesthetics to your plot, a legend will appear. To make changes to the legend, we can use the *theme()* function with the following aesthetics:
+
+- to remove the legend: *legend.position = "none"*
+- to add a title: *legend.title = " "*
+- to change the legend position: *legend.position = " "*
+- etc...
+
+## Conclusion
+
+In this brief document, we explored how to create several types of plots in ggplot2, including bar plots, violin plots, and density plots. ggplot2 offers a diverse range of functions for crafting data visualizations. Some of the most commonly used plot types include scatterplots, line plots, box plots, histograms, bar plots, and density plots.
+
+## Sources
+
+https://www.kaggle.com/datasets/samyakb/student-stress-factors
+
+https://ggplot2.tidyverse.org 
