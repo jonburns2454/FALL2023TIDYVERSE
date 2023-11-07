@@ -26,7 +26,7 @@ The dataset I used was called guns-polls. This data contained information about 
 This is where you can find the data: https://github.com/fivethirtyeight/data/tree/master/poll-quiz-guns
 
 ```{r pressure, echo=FALSE}
-guns_polls <- read_csv("guns-polls.csv")
+guns_polls <- read_csv("https://raw.githubusercontent.com/juliaDataScience-22/j-ferris-01/main/guns-polls.csv")
 
 guns_polls$Start <- as.Date(guns_polls$Start,'%m/%d/%Y')
 guns_polls$End <- as.Date(guns_polls$End,'%m/%d/%Y')
