@@ -1,0 +1,182 @@
+---
+title: "Tidyverse CREATE assignment"
+author: "Saloua Daouki"
+date: "2023-11-04"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction:
+
+The goal of this assignment practice collaborating around a code project with GitHub. You could consider our collective work as building out a book of examples on how to use TidyVerse functions.
+
+## What is tidyverse?
+
+"The tidyverse is a powerful collection of R packages that you can use for data science. They are designed to help you to transform and visualize data. All packages within this collection share an underlying philosophy and common APIs." ([datacamp](https://www.datacamp.com/cheat-sheet/tidyverse-cheat-sheet-for-beginners))
+
+Tidyverse packages include the following libraries:
+
+[![](images/Screen%20Shot%202023-11-04%20at%202.16.12%20PM.png){width="411"}](https://images.datacamp.com/image/upload/v1676302697/Marketing/Blog/Tidyverse_Cheat_Sheet.pdf)
+
+-   ggplot2: it is used to visualize data
+
+-   dplyr: it is used to manipulate data
+
+-   tidyr: it is used to tidy the data
+
+-   readr: it is used to read rectangular data like csv files
+
+-   purr: it is used to work with functions and vectors
+
+-   tibble: it is used to re-imagine the data frame
+
+-   stringr: it is used to work with strings easily
+
+-   forcats: it is used to work with factors.
+
+## loading the librairies:
+
+```{r echo= TRUE }
+library(tidyverse)
+```
+
+## Loading the data:
+
+The dataset I chose for this assignment is about the '[Fruits and Vegetables Prices In USA In The Year 2020](https://www.kaggle.com/datasets/anshikakashyap12/fruits-and-vegetables-prices-in-usa)'. The dataset contains 8 columns and 156 rows.
+
+The column description of the dataset is as follows:
+
+-Item: Name of the fruit or the vegetable.
+
+-Form: The form of the item, i.e., canned, fresh, juice, dried or frozen.
+
+-Retail Price: Average retail price of the item in the year.
+
+-Retail Price Unit: Average retail price's measurement unit.
+
+-Yield: Average yield of the item in the year.
+
+-Cup Equivalent Size: Comparison done with one edible cup of food.
+
+-Cup Equivalent Unit: Comparison's measurement unit.
+
+-Cup Equivalent Price: Price per edible cup equivalent (The Unit of Measurement for Federal Recommendations for Fruit and Vegetable Consumption)
+
+[This is taken form the website of kaggle](https://www.kaggle.com/datasets/anshikakashyap12/fruits-and-vegetables-prices-in-usa)
+
+```{r loading the data}
+url<- "https://raw.githubusercontent.com/SalouaDaouki/Data607/main/Prices.csv"
+dataset <- read.csv(url)
+```
+
+## The dplyr package:
+
+The "dplyr is a grammar of data You can use it to solve the most common data manipulation challenges." ([Datacamp](https://www.datacamp.com/cheat-sheet/tidyverse-cheat-sheet-for-beginners)). Some of its functions are:
+
+- filter() allows you to select a subset of rows in a data frame.
+
+- arrange() sorts the observations in a dataset in ascending or descending order based on one of its variables.
+
+- mutate() allows you to update or create new columns of a data frame.
+
+- summarize() allows you to turn many observations into a single data point.
+
+## Applying dplyr on the data:
+
+### Glimpse of the data:
+
+Now, let's first take a look at the data:
+
+
+```{r glimpse}
+glimpse(dataset)
+```
+
+Looking at the summary of the data will give us the five number summary for the quantitative data and the class of each qualitative data:
+
+```{r 5_numberSummary}
+summary(dataset)
+```
+
+
+### Filtering the data:
+
+Let's filter the data by form of the fruits and vegetables:
+
+```{r Select data of form "Fresh"}
+head(filter(dataset, Form=="Fresh"))
+```
+
+### Arranging the data:
+
+Let's arrange the data on ascending order based on the retail price:
+
+```{r arrange in ascending order the price}
+head(dataset%>% arrange(RetailPrice))
+```
+We can also combine both filter and arrange functions, for example, below, I am going to filter the data to focus only on the fresh fruits and vegetables, then arrange in ascending order based on the retail price.
+
+```{r filter then arrange}
+dataset%>%
+  filter(Form == "Fresh") %>%
+  arrange(RetailPrice)
+```
+
+### Mutating a new column:
+
+Using mutate() we can update or add another column; in this data, I am going to add a column "EquivalentPounds" to calculate the number of pounds equivalent to the cup_equivalent_price. To be able to do that, I am going to filter first the column cup equivalent unit that has pounds only. Then, I can arrange the dataset by the new column in descending order. The new datset will be called "newDataset" for further use.
+
+```{r Filter, mutate and arrange}
+newDataset <- dataset %>% 
+  filter(CupEquivalentUnit=="pounds") %>%
+  mutate(EquivalentPounds =CupEquivalentPrice/RetailPrice)%>%
+  arrange(desc(EquivalentPounds))
+```
+
+### Summarizing the Equivalent pounds:
+
+We can use summarize() function to summarize observations in the dataset, To illustrate, I am going to find the median, the minimum and the maximum values of the new column "EquivalentPounds" I created in the previous subsection.
+
+```{r summarize}
+newDataset %>%
+  summarise(MedianEP = median(EquivalentPounds),
+            MinEP = min(EquivalentPounds),
+            MaxEP = max(EquivalentPounds))
+```
+### Grouping the data by a condition:
+
+To summarize within a group in the dataset, we can use group by. To illustrate I am going to summarize the data the same way as before, but focusing on each form of the fruits and vegetables:
+
+```{r groupby and summarize}
+newDataset %>%
+  group_by(Form) %>%
+  summarise(MedianEP = median(EquivalentPounds),
+            MinEP = min(EquivalentPounds),
+            MaxEP = max(EquivalentPounds))
+```
+
+
+## The ggplot2 package:
+
+### scatterplot:
+
+ggplot2 is a package in tidyverse that allows us to visualize the data using different plots such as scatter plots, which is used to compare two variables. To illustrate, I am going to plot the relationship between the retail price and the cup equivalent price of the fruits and vegetables in different plots based on the form:
+
+
+```{r facet_wrap plots}
+ggplot(dataset, aes(x=RetailPrice,
+          y=CupEquivalentPrice)) +
+     geom_point() +
+     facet_wrap("Form")
+```
+
+Based on the graphs, there is a strong positive correlation between the retail price and the cup equivalent price of the fruits and vegetables across all their five forms.
+
+## Conclusion:
+
+There are many packages within tidyverse that we can use to manipulate, tidy and visualize the data, but for starters, the dplyr and ggplots2 are enough to acquire and practice basic skills in R.
