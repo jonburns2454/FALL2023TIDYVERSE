@@ -1,0 +1,63 @@
+---
+title: 'tidyverse: using forcats to improve your ggplots'
+author: "David Greer"
+date: "11/09/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+
+```
+
+
+```{r, warning=FALSE}
+options(scipen=999)
+cars = read_csv("https://raw.githubusercontent.com/greerda/Data607/main/cars.csv",show_col_types = FALSE) %>%
+  as.data.frame() 
+cars<-na.omit(cars)
+   
+```
+
+## 1A: basic ggplot
+
+
+
+```{r}
+cars %>% 
+  ggplot(aes(x = manufacturer_name, y = odometer_value/1000)) + 
+  geom_col(fill = "lightblue") + 
+    labs(x = "Make", y = "Kilometers/1000",
+           caption = "make and km of vehicles") + theme(axis.text.x = element_text(angle = 66, hjust = 1))
+```
+ 
+##
+
+```{r}
+cars2<-cars%>%group_by(year_produced)
+ggplot(data=cars, aes(x=cars2$year_produced, y=cars2$body_type, color=body_type)) + geom_line()+labs(x="Year", y="Body Type")
+```
+
+```{r}
+ggplot(cars, aes(engine_type,price_usd, fill =body_type))+
+  geom_boxplot()+labs(x="Engine Type", y="Price in USD")
+```
+
+## 
+
+```{r}
+cars<-na.omit(cars)
+ggplot(cars, aes(x = engine_capacity, fill=transmission)) + 
+ geom_histogram(bins = 50)+labs(y="Number of Transmissions", x="Engine Size")
+
+```
+
+
