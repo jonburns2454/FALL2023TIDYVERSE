@@ -1,0 +1,88 @@
+---
+title: 'How To: Load Data Straight From Kaggle'
+author: "By Tony Fraser"
+date: "November 8, 2023"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number_sections: true
+---
+## Overview 
+This snippet demonstrates how to call the kaggle client directly from an R program.  If you use this, you r code can run against any kaggle dataset. 
+
+## Required setup
+1. Make sure python and pip are both installed on your computer, and in your path. 
+2. Make sure you installed the kaggle client with `pip install kaggle`. Kaggle needs to be in your path as well.
+3. You need your credentials file from kaggle. Log in, click on settings, api, and then download your an api credentials file. You'll see below that this code looks for a file called `nogit_kaggle.json` in the same directory. Adjust as necessary.  
+
+## Notes before you start
+1. This is automation code and you don't have to use it. If you have kaggle installed on your computer already, you can just as easily run the `kaggle download` with all the flags yourself.
+2. Make SURE to add your dataset file and your kaggle credentials file to .gitignore.
+3. In this demo, the name "merged_stack_wide.csv" is the exact name of the file stored up on kaggle.
+
+
+
+## load_kaggle_data() 
+```{r messages=FALSE, warning=FALSE, output=FALSE}
+library(jsonlite)
+library(readr)
+library(tidyverse)
+
+load_kaggle_data <- function(local_filename, kaggle_dataset) {
+  if (!file.exists(local_filename)) {
+    # Load Kaggle API credentials only if the file needs to be downloaded
+    kaggle_credentials <- fromJSON("./nogit_kaggle.json")
+    kaggle_username <- kaggle_credentials$username
+    kaggle_key <- kaggle_credentials$key
+    Sys.setenv(KAGGLE_USERNAME = kaggle_username)
+    Sys.setenv(KAGGLE_KEY = kaggle_key)
+
+    if (system("kaggle --version", ignore.stdout = TRUE, ignore.stderr = TRUE) != 0) {
+      stop("Kaggle CLI is not installed or not in the PATH.")
+    }
+
+    message(paste("Downloading", local_filename, "from Kaggle"))
+    
+    if (system(paste("kaggle datasets download", kaggle_dataset, "-f", local_filename)) != 0) {
+      stop("Failed to download the dataset with Kaggle CLI.")
+    }
+    
+    unzip_status <- system(paste("unzip -o", local_filename))
+    if (unzip_status != 0) {
+      stop("Failed to unzip the dataset.")
+    }
+    
+    zip_filename <- paste0(local_filename, ".zip")
+    if (file.exists(zip_filename)) {
+      file.remove(zip_filename)
+    }
+  } else {
+    message(paste(local_filename, "found locally. Loading..."))
+  }
+  
+  read_csv(local_filename)
+}
+
+```
+
+## Use the function
+The function will download the kaggle dataset file, save locally, unzip it, delete the zip file, read the csv back in, and return a dataframe.  If you have already downloaded the file, it will load from your local computer, like loading from cache. Simply delete the data file to force a re-download. 
+
+
+```{r results='markup', message=FALSE}
+k_dataset <- "tonyfraser/formatted-stack-overflow-survey-2017-2022"
+local_wide <- "merged_stack_wide.csv"
+
+# Load the dataset
+merged_stack_wide <- load_kaggle_data(local_wide, k_dataset)
+glimpse(merged_stack_wide)
+```
+
+
+
+
+
+
+
+
