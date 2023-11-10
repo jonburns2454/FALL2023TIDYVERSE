@@ -1,0 +1,48 @@
+---
+title: "sean_amato_tidyverse_part_1"
+author: "Sean Amato"
+date: "2023-11-10"
+output: html_document
+---
+
+**Purpose:**
+This vignette demonstrates the power of combining mutate() and across() to apply the same function over multiple columns without using a for loop. In this example my columns represent years and my rows are the expected years of schooling by country. Once mutate(across()) has been applied, the columns will be converted into expected weeks of schooling in ones lifetime.
+
+Here is the source for my dataset: https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/.
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+schooling_data_years <- read.csv("https://raw.githubusercontent.com/samato0624/DATA607/main/schooling.csv")
+```
+
+**Before:**
+To give you some context, here is just a quick look at 5 countries and their expected years of schooling in 1990, 1991, and 1992.
+```{r}
+limit_columns <- select(schooling_data_years, c(2, 8, 9, 10)) # Filter to the desired columns.
+head(limit_columns, 5) # Show the desired rows.
+```
+**Processing:**
+Now, let's change the data and column names to reflect the number of expected weeks someone will be in school.
+```{r}
+# Clean the data to only include the country column and the expected years columns.
+schooling_data_mod <- select(schooling_data_years, c(2, seq(8, 39, by= 1)))
+
+# Convert years of schooling to weeks of schooling by assuming there are ~39 weeks in a school year, the missing 13 weeks account for vacation time.
+schooling_data_weeks <-  
+  mutate(schooling_data_mod,
+         across(starts_with("Expected.Years.of.Schooling.."),
+         ~.*39, 
+         .names = "{.col} "
+  )) %>%
+  # Filter to the new columns and rename each one.
+  select(c(1, seq(34, 65, by= 1))) %>%
+  rename_with(~ str_replace(.x, "Years", "Weeks"), starts_with("Expected"))
+```
+
+**After:**
+Here is a sample of the end result.
+```{r}
+limit_columns_2 <- select(schooling_data_weeks, c(1, 2, 3, 4)) # Filter to the desired columns.
+head(limit_columns_2, 5) # Show the desired rows.
+```
+
