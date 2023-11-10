@@ -23,9 +23,12 @@ Initial Description and Link:
 Data File:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/guns-polls.csv
 
-=======
+
 
 # Sean Amato
-Purpose: Demonstrate how to use mutate() and across() to avoid looping over columns.
-Code: https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/sean_amato_tidyverse_create.rmd
-Data Source: https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/
+### Purpose: 
+Demonstrate how to use mutate() and across() to avoid looping over columns.  
+### Code: 
+https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/sean_amato_tidyverse_create.rmd  
+### Data Source: 
+https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/  
