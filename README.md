@@ -5,6 +5,8 @@ Revision/Addition Description and Link:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/ggplot_forcats.rmd
 
 * Demonstrates how to flip ggplot axes
+
+# Chun Shing Leung
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/Chun Shing Leung TidyVerse.Rmd
 ### drop_na(), distinct(), pipe, select(), mutate(), filter(), relocate(), group_by(), summarise()
 
