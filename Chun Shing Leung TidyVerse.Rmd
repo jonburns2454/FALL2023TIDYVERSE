@@ -1,0 +1,99 @@
+---
+title: "Chun Shing Leung TidyVerse Assigment"
+author: "CHUN SHING LEUNG"
+date: "2023-11-11"
+output: html_document
+---
+
+Your task here is to Create an Example.  Using one or more TidyVerse packages, and any dataset from fivethirtyeight.com or Kaggle, create a programming sample “vignette” that demonstrates how to use one or more of the capabilities of the selected TidyVerse package with your selected dataset.
+
+## Library & Data
+
+The dataset is selected from Kaggle:
+
+https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand/code
+
+https://raw.githubusercontent.com/tonyCUNY/FALL2023TIDYVERSE/main/hotel_bookings.csv
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(lubridate)
+hotel <- read_csv("https://raw.githubusercontent.com/tonyCUNY/FALL2023TIDYVERSE/main/hotel_bookings.csv")
+
+```
+
+## TidyVerse Package
+
+Tidyverse consists of the following pacakges. 
+
+ggplot2 - A system for declaratively creating graphics, based on The Grammar of Graphics.
+dplyr - It provides a grammar of data manipulation, providing a consistent set of verbs that solve the most common data manipulation challenges
+tidyr -  It provides a set of functions that help you get to tidy data.
+readr - It provides a fast and friendly way to read rectangular data (like csv, tsv, and fwf)
+purrr - It enhances R’s functional programming (FP) toolkit by providing a complete and consistent set of tools for working with functions and vectors.
+tibble - A modern re-imagining of the data frame, keeping what time has proven to be effective, and throwing out what it has not.
+stringr - It provides a cohesive set of functions designed to make working with strings as easy as possible.
+forcats - It provides a suite of useful tools that solve common problems with factors. 
+
+Dplyr and ggplot will be demonstrated
+
+## Dplyr
+
+```{r  warning=FALSE, message=FALSE}
+
+# Use |>  to emphasis a sequence of actions, rather than the object that the actions are being performed on.
+# drop_na() - drops rows contains missing value. 
+# distinct() - Keep distinct/unique rows
+# select() - Keep or drop columns using their names and types
+# mutate() - Create, modify, and delete columns
+# filter() - Keep rows that match a condition
+# relocate() - Change column order
+# group_by() - Group by one or more variables
+# summarise() - Summarise each group down to one row
+# glimpse - Get a glimpse of your data
+
+hotel2 <- hotel |> 
+              drop_na() |> 
+              distinct() |> 
+              select(-c(agent, company, adr)) |> 
+              mutate(arrival_date_month = match(tolower(arrival_date_month), tolower(month.name))) |> 
+              mutate(arrival_date = as.Date(paste(arrival_date_year, arrival_date_month, arrival_date_day_of_month, sep = "-"))) |> 
+              select(-arrival_date_week_number) |> 
+              filter(adults != 0) |> 
+              mutate(kids = children + babies) |>
+              select(-c(children, babies)) |> 
+              relocate(kids, .after = adults) |> 
+              mutate(total_nights = stays_in_weekend_nights + stays_in_week_nights) |>
+              select(-c(stays_in_weekend_nights, stays_in_week_nights)) |> 
+              relocate(total_nights, .after = arrival_date_day_of_month)
+
+hotel3 <- hotel2 |>
+              group_by(country) |> 
+              summarise(count = n())
+
+glimpse(hotel2)
+
+```
+
+## GGplot - Barplot
+
+```{r warning=FALSE, message=FALSE}
+# aes() - It maps variables from the dataset to visual properties (aesthetics) of geometric objects (geoms) in the plot
+# geom_bar() - It makes the height of the bar proportional to the number of cases in each group (or if the weight aesthetic is supplied, the sum of the weights).
+# coord_flip() - flip the coordinate
+# labs() - Modify axis, legend, and plot labels
+
+# Top 10 Countries of Origin for Hotel Visitors
+
+hotel3 |> 
+  top_n(10) |> 
+  ggplot(aes(x = reorder(country, count), y = count, fill = country)) +
+  geom_bar(stat = "identity") + 
+  coord_flip() +
+  labs(title = "Top 10 Countries of Origin for Hotel Visitors",
+       x = "Country",
+       y = "Number of Guests")
+
+
+
+```
