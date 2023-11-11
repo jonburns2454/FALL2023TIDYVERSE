@@ -10,7 +10,12 @@ Revision/Addition Description and Link:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/Chun Shing Leung TidyVerse.Rmd
 ### drop_na(), distinct(), pipe, select(), mutate(), filter(), relocate(), group_by(), summarise()
 
+# carolc
+sample .csv file posted
+code forthcoming!!!
 
+#Fomba
+Loaded Bright Spots
 
 # klussi
 ggplot2 Capabilities
