@@ -28,6 +28,12 @@ Data File:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/guns-polls.csv
 
 
+# Marley Myrianthopoulos
+### dplyr, select, filter, arrange
+Initial Description and Link:
+* Demonstrates how to use select, filter, and arrange to display a subset of data from a data frame.
+* https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/marley_myrianthopoulos_tidyverse_create.Rmd
+
 
 # Sean Amato
 ### mutate() and across()
