@@ -13,6 +13,9 @@ Revision/Addition Description and Link:
 # carolc
 sample .csv file posted
 
+#Fomba
+Loaded Bright Spots
+
 # klussi
 ggplot2 Capabilities
 * Demonstrates capabilities of ggplot2
