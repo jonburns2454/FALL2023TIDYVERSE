@@ -30,7 +30,6 @@ Data File:
 Initial Description and Link: 
 * Demonstrate how to use mutate() and across() to perform a calculation over multiple columns without a for loop.
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/sean_amato_tidyverse_create.rmd
-* https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/tidyverse.pdf
 
 Data Source:
 * https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/  
