@@ -49,3 +49,11 @@ Initial Description and Link:
 Data Source:
 * https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/  
 
+# Shaya Engelman
+### stringr and dplyr functions
+Initial description and link:
+* Demonstrate differnt stringr functions and manipulate data with dplyr functions
+* https://github.com/Shayaeng/FALL2023TIDYVERSE/blob/main/ShayaEngTidyVerseCreate.Rmd
+
+* Data source: https://ourworldindata.org/life-expectancy
+* The csv files are loaded in my GitHub repository
