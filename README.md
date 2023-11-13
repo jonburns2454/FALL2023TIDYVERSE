@@ -12,6 +12,7 @@ Revision/Addition Description and Link:
 
 # carolc
 sample .csv file posted
+code forthcoming!!!
 
 #Fomba
 Loaded Bright Spots
@@ -32,13 +33,18 @@ Data File:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/guns-polls.csv
 
 
+# Marley Myrianthopoulos
+### dplyr, select, filter, arrange
+Initial Description and Link:
+* Demonstrates how to use select, filter, and arrange to display a subset of data from a data frame.
+* https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/marley_myrianthopoulos_tidyverse_create.Rmd
+
 
 # Sean Amato
 ### mutate() and across()
 Initial Description and Link: 
 * Demonstrate how to use mutate() and across() to perform a calculation over multiple columns without a for loop.
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/sean_amato_tidyverse_create.rmd
-* https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/tidyverse.pdf
 
 Data Source:
 * https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/  

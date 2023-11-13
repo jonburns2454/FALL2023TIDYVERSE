@@ -1,0 +1,157 @@
+---
+title: "tidyverse: displaying subsets of data with dplyr"
+author: "Marley Myrianthopoulos"
+date: '2023-11-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+## Displaying a Subset of Data
+
+Before delving into even simple data transformations, the most fundamental of all data skills is the ability to present a subset of existing data. If the data is in a dataframe, with a known number of variables (columns) and observations (rows), we want to be able to display the data from only some rows, only some columns, or a little bit of both. Base R provides options for doing so, of course, but the dplyr pipe operator takes the ease of selecting subsets of data to a whole new level.
+
+## The Data
+
+To demonstrate the use of the Select and Filter dplyr commands to display a subset of a data frame, we'll use fivethirtyeight's 2018 election forecast data.
+```{r}
+election_forecasts <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/forecast-review/forecast_results_2018.csv")
+```
+
+## Part 1: Select
+
+Q: How can I display only some of the columns in the data? For example, what if I only want the cycle, race, and win probability for each party?
+A: When you use the "select" command, you get to choose whatever columns you want. Just provide the column names that you're trying to include. If you don't want to type the full column name, you can put the number of the column instead of the name. The two commands below will result in the same output:
+```{r}
+election_forecasts %>%
+  select(cycle, race, Democrat_WinProbability, Republican_WinProbability)
+
+election_forecasts %>%
+  select(1,3,6,7)
+```
+
+Q: What if I want most of the columns? Can I use this to exclude columns, rather than include columns? For example, what if I want every column EXCEPT the win probability columns?
+A: Sure! Putting a negative sign (hyphen) in front of the column name will create a subset that includes everything but that column. You can use only a single hyphen if you put it in front of a vector of column names. Negative numbers work the same way negative columns do, and you can use a vector with the numbers as well. All four of the commands below will result in the same output:
+```{r}
+election_forecasts %>%
+  select(-Democrat_WinProbability, -Republican_WinProbability)
+
+election_forecasts %>%
+  select(-c(Democrat_WinProbability, Republican_WinProbability))
+
+election_forecasts %>%
+  select(-6,-7)
+
+election_forecasts %>%
+  select(-c(6,7))
+```
+
+## Part 2: Filter
+
+Q: What if I want to display a subset of the rows, rather than the columns? Is that still select?
+A: No, that uses a different command, called "filter". You need to specify the column and what needs to be true in it. For example, the code below selects only races with a Democratic win probability of 50% or more:
+```{r}
+election_forecasts %>%
+  filter(Democrat_WinProbability >= 0.5)
+```
+
+Q: What if I want most of the rows but not ones that meet a certain criteria, for example, every race except for the Gubernatiorial elections. Negative numbers again?
+A: No, use the "not equal" logical operator for that:
+```{r}
+election_forecasts %>%
+  filter(branch != "Governor")
+```
+
+Q: What if I want only the rows that meet multiple conditions, for example, only the rows where the classic version of the model gave the Democrat a higher win probability but the Republican won?
+A: You have two options. You can filter once for each condition, or you can use an "&" to combine them. The two different approaches below have the same output:
+```{r}
+election_forecasts %>%
+  filter(version == "classic") %>%
+  filter(Democrat_WinProbability > Republican_WinProbability) %>%
+  filter(Republican_Won == 1)
+
+election_forecasts %>%
+  filter(version == "classic" & Democrat_WinProbability > Republican_WinProbability & Republican_Won == 1)
+```
+
+Q: What if I'm fine with the rows meeting ANY of my conditions? For example, display only rows where the Democrats either had a higher win probability, or won the election?
+A: The "|" symbol functions as an "or" operator, just like the "&" symbol functioned as an "and" operator. Put it between the conditions:
+```{r}
+election_forecasts %>%
+  filter(Democrat_WinProbability > Republican_WinProbability | Democrat_Won == 1)
+```
+
+Q: What if I'm fine with a range of possibilities? For example, how would I include any row where the Democratic candidate had a chance of winning between 40% and 60%?
+A: You can either use multiple filters to define the edges of the range, or use the "between" command. The two approaches below have the same output:
+```{r}
+election_forecasts %>%
+  filter(Democrat_WinProbability >= 0.4) %>%
+  filter(Democrat_WinProbability <= 0.6)
+
+election_forecasts %>%
+  filter(between(Democrat_WinProbability, 0.4, 0.6))
+```
+
+Q: That's cool, but what if the data isn't numeric? For example, what if I'm happy with the the classic and deluxe versions of the model and only want those rows?
+A: You can use the "in" command and a vector:
+```{r}
+election_forecasts %>%
+  filter(version %in% c("classic", "deluxe"))
+```
+
+Q: Let's get fancy. Suppose I want to select the rows that have a more complicated criteria. For example, there's no column for "State," but you can figure out the State from the "race" column. How would I get only the rows for races in New York, California, Florida, or Texas?
+A: Fancy indeed! We're gonna need the stringr package for that, so that we can use "str_detect":
+```{r}
+library(stringr)
+
+election_forecasts %>%
+  filter(str_detect(race, "NY|CA|FL|TX"))
+```
+
+## Part 3: Arrange
+
+Q: What if I want to display all these rows I'm selecting in a different order? Say I want to sort the table from lowest to highest Republican win probability? 
+A: The "arrange" command has your back:
+```{r}
+election_forecasts %>%
+  arrange(Republican_WinProbability)
+```
+
+Q: Ok, cool! And what if I want it from highest to lowest?
+A: You have to tell it that you want it descending by putting "desc":
+```{r}
+election_forecasts %>%
+  arrange(desc(Republican_WinProbability))
+```
+
+Q: And what if I want to sort by multiple columns? For example, sort by Republican win probability but when two or more races have the same Republican win probability, sort by the type of race and then within that by the state?
+A: You can put multiple columns separated by commas. The first column will be the top level sort, the second column will be the "tiebreaker," and so on:
+```{r}
+election_forecasts %>%
+  arrange(Republican_WinProbability, branch, race)
+```
+
+Q: And what if I want some of those descending, say, the Republican win probability and state?
+A: You put "desc" for each one that needs to be descending:
+```{r}
+election_forecasts %>%
+  arrange(desc(Republican_WinProbability), branch, desc(race))
+```
+
+## Part 4: Put It All Together
+
+Q: What does it look like to put these all together? For example, supposing I want to see only the race and win probability columns for congressional races where the deluxe model gave the Republican a win probability between 50% and 80% but the Democrat wound up winning, arranged by descending likelihood of a Republican win?
+A: Just use the piping operator to do one after the other! In general, though, filter before selecting, otherwise you might find that you have eliminated the columns that your filter relied on:
+```{r}
+election_forecasts %>%
+  filter(version == "deluxe" & Democrat_Won == 1) %>%
+  filter(between(Republican_WinProbability, 0.5, 0.8)) %>%
+  select(3,6,7) %>%
+  arrange(desc(Republican_WinProbability))
+```
