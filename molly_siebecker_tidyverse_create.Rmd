@@ -1,0 +1,72 @@
+---
+title: "DATA 607 Tidyverse Create"
+author: "Molly Siebecker"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#stringr
+
+The stringr package in the Tidyverse contains multiple functions that are useful for working with character strings. Below are examples of a few of these functions (str_to_lower, str_length, str_sort, str_detect, and str_count) and how they might be used with the babynames data set in base r. 
+
+```{r}
+library(babynames)
+library(stringr)
+library(dplyr)
+data("babynames")
+```
+
+##str_to_lower
+The str_to_lower function converts all characters in a string to lowercase (and, conversely, the str_to_upper function converts all characters to uppercase.) Here we overwrite the "name" column to convert each name to lowercase, which would be useful for analysis and detecting patterns.
+```{r}
+babynames <- babynames %>%
+  mutate(name = str_to_lower(name))
+```
+
+##str_length
+Suppose you wanted to analyze how longer or shorter names have gone in and out of fashion over the years, you could start by creating a new variable for the length of each name, which can be extracted from the "name" column using str_length.
+```{r}
+babynames <- babynames %>%
+  mutate(name_length = str_length(name))
+```
+
+##str_sort
+For a comprehensive list of the names in the data set, you could use str_sort to alphabetize the names.
+```{r}
+sorted_names <- babynames %>%
+  distinct(name) %>%
+  pull(name) %>%
+  str_sort()
+```
+
+##str_detect
+str_detect is used to detect a pattern match, but it returns a logical vector instead of the match itself. This makes it useful for filtering a data frame. For example, you could filter for girls' names that end in "a" by using str_detect with a regex.
+```{r}
+girls_names_end_a <- babynames %>%
+  filter(sex == "F") %>%
+  filter(str_detect(name, "a$"))
+```
+
+You could also, for example, look for names that contain at least one sequence of at least two of the same letter:
+```{r}
+double_letter <- babynames %>%
+  filter(str_detect(name, "(.)\\1"))
+```
+
+##str_count
+str_count returns the number of times that a pattern appears within a string. So if you wanted to track the frequency with which the letter "a" appears in girls' names, you could first create a new variable using str_count.
+```{r}
+girls_names_a <- babynames %>%
+  filter(sex == "F") %>%
+  mutate(a_freq = str_count(name, "a"))
+```
+If we had not used str_to_lower earlier, str_count would have missed "a" when it started a name, based on the way we wrote the regex.
+
+#Conclusion
+These are only a few of the functions available in stringr, and they have only been used with single words. Stringr functions can also be used with more complex text with punctuation and white space (there are specific functions for dealing with whitespace in text.) There are also groups of functions in stringr that are useful for mutating strings and joining/concatenating strings.  

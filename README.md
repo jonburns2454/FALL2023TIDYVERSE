@@ -47,5 +47,12 @@ Initial Description and Link:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/sean_amato_tidyverse_create.rmd
 
 Data Source:
-* https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/  
+* https://www.kaggle.com/datasets/iamsouravbanerjee/years-of-schooling-worldwide/
+
+# Molly Siebecker
+### str_to_lower, str_length, str_sort, str_detect, str_count
+Initial Description and Link:
+* Demonstrates how to use str_to_lower, str_length, str_sort, str_detect, and str_count to manipulate character strings.
+* https://github.com/mollysiebecker/FALL2023TIDYVERSE/blob/main/molly_siebecker_tidyverse_create.Rmd
+* Data Source: "babynames" data set in base r
 
