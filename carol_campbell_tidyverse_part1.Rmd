@@ -1,0 +1,218 @@
+---
+title: "Data 607 - Tidyverse CREATE pt1"
+author: "Carol Campbell"
+date: "2023-11-11"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+[![Tidyverse graphic]{width="411"}](https://bookdown.org/michela_cameletti/notescrashcourser/images/4_tidyverse-packages.png)
+
+
+## Introduction:
+
+The goal of this assignment practice collaborating around a code project with GitHub. You could consider our collective work as building out a book of examples on how to use TidyVerse functions.
+
+## What is Tidyverse?
+
+Tidyverse is a collection of R packages which contain tools for transforming and visualizing data. To date there are over 100 packages within the tidyverse library, however loaded with the core package are:
+
+- ggplot2, for data visualisation  
+
+- dplyr, for data manipulation using 5 powerful verbs "filter, arrange, select , summarize, and mutate  
+
+- tidyr, for data tidying, ie restructuring data 
+
+- readr, for data import
+
+- purrr, for functional programming  
+
+- tibble, for tibbles, a modern re-imagining of data frames  
+
+- stringr, for strings and fast manipulation thereof   
+
+- forcats, for factors  
+
+- lubridate, for date/times
+
+To see all the packages included with tidyverse use "tidyverse_packages()".
+
+
+
+## Load libraries
+```{r echo = FALSE} 
+
+library(tidyverse)
+library(kableExtra)
+
+```
+
+## Import data
+
+For this vignette, I chose to analyze '[Amazon's Top 100 Bestselling Books](https://www.kaggle.com/datasets/anshtanwar/top-200-trending-books-with-reviews?select=Top-100+Trending+Books.csv)'. 
+
+
+```{r}
+data <- read.csv("https://raw.githubusercontent.com/carolc57/Data607-Fall23/main/Amazon%20top%20100%20Trending%20Books.csv", header = TRUE, sep = ",")
+
+amazon100 <-as.data.frame(data)
+
+kable(head(amazon100, n = 5))  #show 10 rows only
+```
+
+## About the Amazon- Top 100 Bestselling books dataset...
+
+This dataset offers an in-depth look into Amazon's top 100 Bestselling books along with their customer reviews. Whether you're a book enthusiast, data scientist, or just curious about the latest literary trends, this dataset provides a window into the world of popular reading.
+
+- Book Rank: The ranking of the book among the top 100 Bestselling books on Amazon.
+- Book Title: The title of the book.
+- Price: The price of the book in USD.
+- Rating: The overall rating of the book, on a scale of 1 to 5.
+- Author: The author of the book.
+- Year of Publication: The year in which the book was published.
+- Genre: The genre or category to which the book belongs.
+- URL: The URL link to the book on Amazon's platform.
+- Review Title: The title of the book review.
+- Reviewer: The name of the person who has written a review for the book.
+- Reviewer Rating: The rating given by the reviewer for the book, on a scale of 1 to 5.
+- Review Description: The text description of the review given.
+- Is_verified: Indicates whether the review is verified as a genuine customer review.
+- Date: The timestamp indicates the date when the review was posted.
+- Timestamp: The timestamp indicates when the review was posted.
+- ASIN: Amazon Standard Identification Number assigned to products on Amazon.
+
+In order to begin our analysis we will need to see the composition of the variables, thus we'll use the summary functions.
+
+```{r}
+summary(amazon100)
+```
+Using summary() tells us that our dataset has 100 observations or rows and 8 variables or columns. 4 of the variables are quanlitative, easily identifiable as 'chr' datatype and 4 quantitative variables, identifiable as 'int' or 'dbl'. In the case of quantitative variables the mean, min, max, mode 1st and 3rd quartiles are provided for each.   
+
+
+## Using dplyr statements to slice and dice our dataframe
+
+The first functions that we will explore are rename() and select(), where we will rename some columns, and drop others (through omission) with the select function
+
+### Renaming some columns, dropping others...     
+Some of our columns have long or redundant names, let's change that with the rename (). At the same time we'll drop the url column.
+
+```{r}
+#rename columns, drop url column
+amazon100m <- 
+  rename(amazon100, 
+        title = book.title,
+        price = book.price,
+        published = year.of.publication) |>
+  select(Rank, title, author, price, published, genre, rating)
+
+kable(head(amazon100m, n = 5))
+
+summary(amazon100m)
+```
+
+### Inquiring minds want to know...
+
+Our dataset covers publication years 1947 through 2023, but we're curious to know the top 100 of books for the year the years 2020 - 2023 (Covid 19 pandemic), and we only want those whose ratings were higher than 3.5. Lets see how we accomplish this...
+
+### filter() and arrange()
+```{r}
+
+covidamazon100m <- amazon100m |>
+  filter(published == '2020'| published == "2021" | published == "2022" | published == '2023') |>
+  arrange(rating) 
+
+kable(head(covidamazon100m, n = 5))
+```
+It's interesting to note that 47 of our original observation were in the top 100 during Covid 19 years of 2020 - 2023.  
+
+
+
+## Grouping..
+
+Let's find the minimum and maximum price by published year using summarise and group
+
+```{r groupby and summarize}
+covidamazon100m |>
+  group_by(published) |>
+  summarise(Avgprice = mean(price),
+            Minprice = min(price),
+            Maxprice = max(price))
+```
+
+During the Covid-19 pandemic, the average price of books rose from $9.93 in 2020 to $17.54 in 2023.
+
+
+Let's use mutate to group our data into new columns based on user-defined conditions...
+
+
+```{r}
+genrerefined <- amazon100m |>
+    mutate(fiction = grepl("fiction|romance|fantasy|thriller", genre, ignore.case=TRUE)) |>
+    mutate(nonfiction = grepl("nonfiction|memoir|autobiography|biography|cookbook|christian|literature|educational", genre, ignore.case=TRUE)) |>
+   
+select(fiction, nonfiction)  
+```
+
+### Using summarise, gather and arrange functions to group data
+
+Frequency analysis of genrerefined
+```{r counting the frequency for each genre}
+
+revgenre <- genrerefined %>%
+  summarise_all(sum)%>%
+  gather(genre, freq)%>%
+  arrange(desc(freq))
+
+tibble(revgenre)
+
+```
+Here we see that there are 63 fiction and 37 nonfiction books in our dataset. Let's graph them using ggplot2.
+
+
+## ggplot2
+
+ggplot 2 allows us to visualize our data in a variety of ways. Here we will use a simple barplot to illustrate our genre findings.
+
+
+```{r  genre plot}
+
+ggplot(revgenre,aes(x=reorder(genre, freq), y=freq)) + geom_bar(stat='identity',fill="goldenrod") + xlab('') + ylab('Frequency') + labs(title='Amazon Top 100 books nonfiction vs fiction') 
+```
+
+Here we can clearly see that fiction-like books outnumber nonfiction-like books by nearly 2 to 1.
+
+
+
+## Conclusion:
+Tidyverse contains a myriad of tools that allows us to easily analyze data, find insights and see correlations. Other possibilities include the ability to do linear regressions (not illustrated here due to time constraints), and other statistical functions.    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### References:  
+- https://tidyverse.tidyverse.org  
+- https://bookdown.org/michela_cameletti/notescrashcourser/lab-4---20102022.html
+--https://www.kaggle.com/datasets/anshtanwar/top-200-trending-books-with-reviews?select=Top-100+Trending+Books.cs
