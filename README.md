@@ -56,3 +56,11 @@ Initial Description and Link:
 * https://github.com/mollysiebecker/FALL2023TIDYVERSE/blob/main/molly_siebecker_tidyverse_create.Rmd
 * Data Source: "babynames" data set in base r
 
+# Shaya Engelman
+### stringr and dplyr functions
+Initial description and link:
+* Demonstrate differnt stringr functions and manipulate data with dplyr functions
+* https://github.com/Shayaeng/FALL2023TIDYVERSE/blob/main/ShayaEngTidyVerseCreate.Rmd
+
+* Data source: https://ourworldindata.org/life-expectancy
+* The csv files are loaded in my GitHub repository
