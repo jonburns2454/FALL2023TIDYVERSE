@@ -1,0 +1,160 @@
+---
+title: "Untitled"
+author: "Fomba Kassoh"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+I am using the ggplot package to show how data visualization can be used in data analysis. I am taking my data from Kagle database. The data sets can be found from the following urls:
+
+https://www.kaggle.com/datasets/joebeachcapital/30000-spotify-songs?select=spotify_songs.csv
+
+https://www.kaggle.com/datasets/larsen0966/penguins?select=penguins.csv
+
+# Box plot
+A box plot is a standardized way of displaying the distribution of data based on a five-number summary: minimum, first quartile (Q1), median, third quartile (Q3), and maximum. It can tell you about outliers in a dataset and what their values are. It can also tell you if your data is symmetrical, how tightly your data is grouped, and if and how your data is skewed.
+
+
+# Load the Spotify data
+The preview of the spotify data is shown below.
+
+```{r `}
+library(tidyverse)
+library(dplyr)
+library(readr)
+
+spotify_data <- read_csv('C:/Users/RemoteUser/Documents/DATA 607/Tidyverse Create/spotify_songs.csv')
+glimpse(spotify_data)
+```
+# Plot the box plot
+The box plot below shows the distribution of Track Popularity by Playlist Genre.
+
+```{r}
+library(ggplot2)
+
+# Assuming your data is in a data frame named 'df'
+p <- ggplot(spotify_data, aes(x = playlist_genre, y = track_popularity)) + 
+  geom_boxplot() +
+  theme_minimal() + 
+  labs(title = "Distribution of Track Popularity by Playlist Genre",
+       x = "Playlist Genre",
+       y = "Track Popularity")
+
+print(p)
+
+```
+
+# Violin Plot
+The violin plot combines box plots with kernel density plots. This gives you a deeper understanding of the density at different values, showing both the spread and the density of the data, with the thickness of the plot representing the frequency of data points.
+
+```{r}
+library(ggplot2)
+
+ggplot(spotify_data, aes(x = playlist_genre, y = track_popularity)) +
+  geom_violin(trim = FALSE)
+
+```
+
+```{r}
+penquin_data <- read_csv('C:/Users/RemoteUser/Documents/DATA 607/Tidyverse Create/penguins.csv')
+penquin_data
+```
+
+
+# Strip Plot
+The Strip Plot is similar to a scatter plot, but points along the categorical axis are jittered. It's good for small datasets but can become cluttered with larger datasets.They can be used to show correlation between two variables.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_jitter(width = 0.2)
+
+```
+# Dot Plot
+Similar to a strip plot, but typically without jitter. Each point represents an observation. This can be particularly useful when you have discrete data.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_dotplot(binaxis = 'y', stackdir = 'center', dotsize = 1)
+
+```
+
+# Bee Swarm Plot
+Also similar to a scatter plot, but the points are adjusted so they don't overlap. This gives a clear indication of the distribution of the data and can show clusters within the data.
+
+```{r}
+library(ggplot2)
+library(ggbeeswarm)
+
+ggplot(penquin_data, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_beeswarm()
+
+```
+# Histogram
+Shows the frequency distribution of a single continuous variable by dividing the data into bins and counting the number of observations in each bin.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 60) 
+
+```
+# Rug Plot
+Places individual data points along an axis, which is useful for showing the exact placement of distribution. It's often combined with other plots like histograms or density plots.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 60) 
+  geom_rug(sides = "b") # Add a rug at the bottom
+
+```
+
+# Density Plot 
+A smoothed version of a histogram, it shows the distribution shape of the data. It can be particularly useful for comparing the distribution of a variable across different groups.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = body_mass_g, fill = species)) +
+  geom_density(alpha = 0.5) 
+
+```
+
+# Cumulative Frequency Plot
+Shows the cumulative counts or proportions up to a certain value, giving you a sense of the number or proportion of observations below a particular value in the data distribution.
+
+```{r}
+library(ggplot2)
+
+ggplot(penquin_data, aes(x = body_mass_g)) +
+  stat_ecdf(geom = "step") # Cumulative distribution function
+
+```
+#Empirical Cumulative Distribution Function (ECDF)
+Unlike a box plot that summarizes data, an ECDF provides a complete representation of the distribution and is especially useful for large datasets.
+
+```{r}
+library(ggplot2)
+
+
+ggplot(penquin_data, aes(x = body_mass_g)) +
+  stat_ecdf(geom = "step") +
+  labs(title = "Empirical Cumulative Distribution Function",
+       x = "Body Mass Index",
+       y = "ECDF")
+
+
+```
+
+
