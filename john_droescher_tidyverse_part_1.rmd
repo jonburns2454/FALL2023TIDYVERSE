@@ -2,7 +2,11 @@
 
 ```{r Load libraries and datasets}
 library(tidyverse)
-
+library(tidyr)
+library(ggplot2)
+library(DT)
+```
+```{r}
 abb_prices <- read.csv("https://www.dropbox.com/scl/fi/rz4t5z8vy1spqptlvtsj7/airbnb_listing_price.csv?rlkey=r0eox5fixckhda984n4blu3tp&dl=0&raw=1")
 abb_loc <- read.csv("https://www.dropbox.com/scl/fi/i8ohe34qrw3aye0ghysy5/airbnb_location_info.csv?rlkey=nldvzvfpryuwc3vk8hqj36e8p&dl=0&raw=1")
 abb_prop <- read.csv("https://www.dropbox.com/scl/fi/scabomsh011ie0rog0ror/airbnb_property_info.csv?rlkey=28zqp78t3ubos3nb52cjm61sl&dl=0&raw=1")
@@ -12,4 +16,9 @@ abb_prop <- read.csv("https://www.dropbox.com/scl/fi/scabomsh011ie0rog0ror/airbn
 # 1st: merge the datasets
 abb_merge <- full_join(abb_prices, abb_loc, by = "listing_id")
 abb_merge <- full_join(abb_merge, abb_prop, by = "listing_id")
+```
+```{r }
+testset<-abb_merge%>%select(price, neighbourhood)
+testset
+
 ```
