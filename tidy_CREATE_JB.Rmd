@@ -1,0 +1,157 @@
+---
+title: "Tidy Verse Create JB"
+author: "Jonathan Burns"
+date: "2023-11-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+A demonstration into GGPLOT and its features.
+
+##Packages required
+```{r message=FALSE}
+library(tidyverse)
+```
+
+##Import data and loading it into R
+```{r}
+NBA_DF <- read.csv("https://raw.githubusercontent.com/jonburns2454/DATA607/main/2021-2022%20NBA%20Player%20Stats%20-%20Regular.csv", sep = ";", header = T)
+```
+
+I used a dataset that recorded NBA stats for the 2021-2022 NBA season. This is from a KAGGLE data set and records
+Name, Team, Age, games played, points per game and a plethora of shooting and defensive percentages.
+
+The data was found on kaggle at this link :https://www.kaggle.com/datasets/vivovinco/nba-player-stats and then it was downloaded, extracted and uploaded into my GitHub so anyone
+can access it down the road.
+
+##Objectives:
+
+While the Tidyverse packages has a multitude of features and packages I will be focusing on its dplyr and ggplot functions.
+
+
+##Step 1:
+
+To begin we will use dplyr functions and piping operators to transform our data into something usable for ggplot visualization.
+
+This will start with renaming target variables for clarity and removing redundant and unwanted columns.
+
+
+```{r}
+NBA_DF <- NBA_DF %>% 
+    select(-Rk, -GS, -MP)#Remove unwanted rows
+```
+
+
+```{r}
+NBA_DF_1 <- NBA_DF %>% 
+    select(Player, Tm, PTS, G, FG, everything()) #This takes our data and rearranges the first 5 columns into what we want to look at first and then puts the rest of the columns in order with the everything() addition.
+```
+
+
+Renaming can be done several ways, but the most sucinct way to do it for a small subset of variables is by using rename(). Which follows a format of "New Name" = "Old Name"
+```{r}
+NBA_DF_2 <- NBA_DF_1 %>% 
+    rename("Team" = "Tm", "Points Scored" = "PTS", "Games Played" = "G", "Field Goals PG" = "FG") %>% 
+    select(Player, Team, `Points Scored`, `Games Played`, `Field Goals PG`) #Keeping what we want, after further diliberation, this can also be done before visualization, but doing it here makes it less confusing.
+
+```
+
+
+Now that the data has been renamed for clarity, columns have been dropped and rearranged, we can now look to other dplyr functions and capabilites to better set up our visual analysis.
+
+Using mutate, new variables used for analysis are possible.
+```{r}
+NBA_DF_3 <- NBA_DF_2 %>% 
+    mutate(Total_Points = `Points Scored`*`Games Played`)
+
+```
+
+
+Lets say I want to run a regression on my new found variable, seeing if Field Goal Percentage and Games Played have any affect on Total Points by players.
+```{r}
+
+NBA_regression <- lm(Total_Points ~ `Games Played` + `Field Goals PG`, data = NBA_DF_3)
+
+summary(NBA_regression)
+
+```
+
+After getting my regression variable we can look to visualize the regression using GGPlot. Plots like this are a simple, but powerful way to visualize a regression, rather than just calculating it out and settling for the summary figures.
+
+This ggplot shows us quite a few capabilites about the package, and also some things to do when the visualization doesnt go as planned, hence my top_10 variable and custom labels. Labeling specific data points is a little tricky with ggplot and often requires some sort of workaround and formatting beforehand.
+
+```{r}
+top_10 <- NBA_DF_3[order(NBA_DF_3$Total_Points, decreasing = T), ][1:10, ]
+
+custom_labels <- c("Trae Young", "DeMar DeRozan", "Joel Embiid", "Jayson Tatum", "Nikola Jokic", "Giannis Antetokounmpo", "Luka Doncic", "Devin Booker", "Karl-Anthony Towns", "Donovan Mitchell")
+
+ggplot(NBA_DF_3, aes(`Field Goals PG`, Total_Points, label = ifelse(row.names(NBA_DF_3) %in% row.names(top_10), custom_labels, ""))) +
+    geom_point(color = NBA_DF_3$`Games Played`) +
+    geom_smooth(method = "lm", se = T) +
+    geom_text(nudge_y = 0.1, check_overlap = TRUE, size = 3) +
+    labs(title = "Visualized Regression")
+```
+
+Now we can also use a few different methods to better represent out data within the visualization.
+
+Lets say we want to look at individual teams and their respective total scores per season. While there are a few different way we can achieve this, this method I will show is fairly straightforward.
+
+```{r}
+NBA_DF_4 <- NBA_DF_3 %>% 
+    group_by(Team) %>% 
+    summarise(Team_Totals = sum(Total_Points))
+
+ggplot(NBA_DF_4,aes(Team, Team_Totals))+
+    geom_point()
+
+```
+This is a good opportunity to examine outliers and show how we can utilize dplyr functions to find an outlier. While it is quite clear what the outlier is, on larger datasets with way more data points finding ouliers and cutoffs can be difficult.
+
+We can use filter on our data to hone in on weird values. After seeing that TOT is the culprit, I know immediatley without looking at the source data that this is a Total of all NBA teams and not a physical team. So its not technically an outlier, its still something that throws off our analysis, so we can also use dplyr to remove it.
+```{r}
+NBA_DF_4 %>% 
+    filter(Team_Totals >= 30000)
+
+```
+```{r}
+NBA_DF_4_filter <- NBA_DF_4 %>% 
+    filter(!(Team_Totals >= 30000))
+```
+
+
+Lets retry out plot. This data is now normalized, but the x axis is unreadable. this can be fixed.
+
+```{r}
+ggplot(NBA_DF_4_filter,aes(Team, Team_Totals))+
+    geom_point()+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Lastly I will make this more meaningful adding some more elements and color.
+
+```{r warning=FALSE}
+library(RColorBrewer)
+library(viridis)
+library(wesanderson)
+
+ggplot(NBA_DF_4_filter,aes(Team, Team_Totals, size = Team_Totals))+
+    geom_point(color = "#FF6600")+
+    labs(title = "2021-2022 Points Per Team NBA", x = "Team", y = "Total Points") +
+    theme(axis.text.x = element_text(angle = 50, hjust = 1), 
+    panel.background = element_rect(fill = "#ffcc99"),  # Change background color
+    panel.grid.major = element_line(color = "black"),  # Change grid color
+    text = element_text(family = "Ariel"),  # Change font family
+    plot.title = element_text(size = 16, face = "bold"),  # Adjust title font size and style
+    axis.title = element_text(size = 14),  # Adjust axis title font size
+    axis.text = element_text(size = 10, color = "black"))
+    
+```
+
+
+
+
+
+

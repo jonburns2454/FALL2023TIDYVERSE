@@ -1,0 +1,74 @@
+---
+title: "TidyVerse Create Animated Ggplots"
+author: "Shaya Engelman"
+date: "2023-11-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment Prompt
+
+Your task here is to Create an Example.  Using one or more TidyVerse packages, and any dataset from fivethirtyeight.com or Kaggle, create a programming sample “vignette” that demonstrates how to use one or more of the capabilities of the selected TidyVerse package with your selected dataset
+
+## Tidyverse Assignment
+
+The Tidyverse universe comes with many packages loaded with features. The stringr package is one such library. It is a package designed to help manipulate strings. It is helpful for cleaning, extracting, and manipulating text data. The dplyr library is another useful library in the Tidyverse ecosystem. The dplyr package is designed for data manipulation and is great for filtering and summarizing data. Below I will illustrate some uses of these packages.
+
+First, load the required libraries:
+```{r}
+library(tidyverse)
+library(RCurl)
+```
+
+Now load the data we will be analyzing. This is data collected from many countries for the last 70+ years. It is couning the amount of people who died in every 5 year span age group in units of 1000.
+```{r}
+age_at_death <- read.csv("https://raw.githubusercontent.com/Shayaeng/Data607/main/TidyVerse%20Create/annual-death-rate-by-age-group.csv")
+```
+
+This dataset is extremely large. In order to filter out one section, I used str_detect() from the stringr package to look for all the data from the USA and used the filter() function from the dplyr package to filter out only that data. The columns had extremely unwieldy names, I solved that by using stringr to manipulate those character names.
+```{r}
+age_at_death <- age_at_death |>
+  filter(str_detect(Code, "USA")) |>
+  rename_all(~ str_remove(., ".*Age\\.\\.")) |>
+  rename_all(~ str_replace_all(., "\\.", "-"))
+  
+print(colnames(age_at_death))
+```
+
+In order to do further analyses I wanted to convert the data to long format. I was able to do that using the pivot_longer() function from the tidyr package, also a part of the Tidyverse ecosystem.
+```{R}
+deaths_long <- age_at_death |>
+  pivot_longer(cols = 4:22, names_to = "AgeGroup", values_to = "Deaths")
+```
+
+The dataset had a flaw. It didn't include a population or percentage metric to be able to analyze how the proportions might have changed over time. To solve this, I used the mutate() function from the dplyr package to add a column with the ratio of that specific age group's total deaths relative to all recorded deaths that year.
+```{r}
+deaths_long <- deaths_long |>
+  group_by(Year) |>
+  mutate(ratio_column = Deaths / sum(Deaths)) |>
+  ungroup()
+```
+
+The Tidyverse also includes the ggplot2 package. Ggplot is great for creating plots and visualizations of the data. My next step was to visualize this data with a barplot, however, my data was too large to easily plot. I solved this by again filtering the data using the dplyr package. I filtered the data to only include years that end in 0 or 5. This sufficiently cuts down the size of the data being plotted while not losing out on the overall historical trends. I then used ggplot to plot the data and used a variety of different ggplot features to customize my plot.
+```{r}
+filtered_data <- deaths_long |>
+  filter(Year %% 5 == 0) |>
+  filter(AgeGroup %in% c("80-84", "85-89"))
+
+ggplot(filtered_data, aes(x = Year, y = ratio_column, fill = AgeGroup)) +
+  geom_col() +
+  scale_y_continuous() +
+  labs(title = "Ratio of Deaths of People in their 80s",
+    x = "Year",
+    y = "Deaths Ratio") +
+  theme_minimal()
+```
+
+## Conclusion
+
+There does seem to be an increase in life expectancy over the last 70+ years. The ratio of people dyeing in their 80s relative to dying younger than that is constantly going up over the observed data.
+
+Almost all of what I did in this entire project used functions from packages part of the tidyverse ecosystem.

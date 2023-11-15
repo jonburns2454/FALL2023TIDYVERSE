@@ -1,0 +1,71 @@
+---
+title: "Tidyverse Assignment"
+author: "Kossi Akplaka"
+date: "2023-11-12"
+output: html_document
+---
+
+## Load the package
+
+```{r}
+# Install and load required packages
+#install.packages("tidyverse")
+library(tidyverse)
+
+```
+
+## Data manipulation
+
+```{r}
+# Load the airlines dataset from fivethirtyeight.com
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/airline-safety/airline-safety.csv"
+airlines <- read_csv(url)
+
+# Explore the dataset
+glimpse(airlines)
+
+```
+
+Summary statistic
+
+```{r}
+
+# Let's focus on only a few columns for simplicity
+selected_columns <- c("airline", "avail_seat_km_per_week", "incidents_85_99", "fatal_accidents_85_99", "fatalities_85_99")
+
+airlines_selected <- airlines %>%
+  select(all_of(selected_columns)) %>%
+  filter(!is.na(incidents_85_99))  # Remove rows with missing incident data
+
+# Summary statistics
+summary_stats <- airlines_selected %>%
+  summarise(
+    average_incidents = mean(incidents_85_99),
+    average_fatal_accidents = mean(fatal_accidents_85_99),
+    average_fatalities = mean(fatalities_85_99)
+  )
+
+print(summary_stats)
+```
+
+## Data Visualization
+
+```{r}
+
+# Let's create a bar chart to visualize the number of incidents for each airline
+incident_chart <- airlines_selected %>%
+  ggplot(aes(x = reorder(airline, incidents_85_99), y = incidents_85_99)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Number of Incidents by Airline",
+       x = "Airline",
+       y = "Number of Incidents") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(incident_chart)
+
+```
+
+## Conclusion
+
+This vignette covers loading data, cleaning and wrangling, calculating summary statistics, and creating a simple bar chart using the TidyVerse packages (dplyr and ggplot2) with the "airlines" dataset from fivethirtyeight.com. 

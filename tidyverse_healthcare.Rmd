@@ -1,0 +1,100 @@
+---
+title: "tidyverse"
+author: "Michael Robinson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Introduction 
+
+In this assignment, I will explore a synthetic healthcare dataset using the TidyVerse packages. The dataset, designed to mimic real-world healthcare data, is comprehensive, containing 10,000 rows and 15 columns. It includes a range of information typical in healthcare settings, such as patient names, ages, genders, medical conditions, admission and discharge dates, and more.
+thtih data was obtain from https://www.kaggle.com/datasets/prasad22/healthcare-dataset
+
+
+# Load the Dataset and Libraries needed
+
+ 
+```{r}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(DT)
+
+patient_data <- read_csv("https://raw.githubusercontent.com/MRobinson112/tidy_verse/main/healthcare_dataset.csv")
+
+
+datatable(patient_data, options = list(scrollX = TRUE))
+
+
+```
+
+# Filtering
+
+Filtering is important in data analysis, it is used to narrow dataset to the relevant data. This increases the accuracy and relevance of the analysis by removing unnecessary data.
+
+```{r}
+
+# filter all patients over 50
+patients_over_50 <- patient_data %>%
+  filter(Age > 50
+         
+# filter all patients over 50 that are male 
+male_patients_over_50 <- patient_data %>%
+  filter(Gender == "Male", Age > 50)
+```
+# Arranging
+
+Arranging data is used in data analysis to aid in understanding trends and patterns.
+
+```{r}
+
+# sort patientes by date of admission 
+
+patients_sorted_by_admission <- patient_data %>%
+  arrange(`Date of Admission`)
+
+head(patients_sorted_by_admission)
+```
+# Summerizing
+
+Summarizing is important in data analysis because it helps to manage large datasets, find patterns, compare different data, and make decisions.
+
+```{r}
+
+average_billing_by_condition <- patient_data %>%
+  group_by(`Medical Condition`) %>%
+  summarize(Average_Billing = mean(`Billing Amount`))
+
+average_billing_by_condition
+```
+
+# Visualization 
+
+visualization transforms data into a more accessible and interpretable form, enhancing understanding, communication, and decision-making.
+
+```{r}
+
+# Count of male patients over 50
+count_male_over_50 <- nrow(male_patients_over_50)
+
+# Count of all patients over 50
+count_patients_over_50 <- nrow(patients_over_50)
+
+# create a new data frame of summarized information.
+
+plot_data <- data.frame(
+  Category = c("Male Patients Over 50", "All Patients Over 50"),
+  Count = c(count_male_over_50, count_patients_over_50)
+)
+
+ggplot(plot_data, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Comparison of Male Patients Over 50 vs. All Patients Over 50",
+       x = "",
+       y = "Count")
+
+```
