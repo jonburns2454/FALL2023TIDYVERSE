@@ -49,7 +49,7 @@ head(Amazon_postCovid)
 
 The price had grown by more than 7 USD  between 2020 and 2023. But by looking at the price growth column, we can see that the price grew by a little over 11 USD from 2020 to 2021. Then it dropped by about 8 USD between 2021 and 2022, then it grew by over 4 USD the next year. Let's apply the same code on the entire dataset: 
 
-```{r ECC}
+```{r new data ECC}
 newAmazon100 <- amazon100 %>%
   group_by(year.of.publication)%>%
   summarise(Average = mean(book.price))%>%
@@ -61,7 +61,7 @@ head(newAmazon100)
 
 To better visualize the price growth, we can plot a line graph:
 
-```{r ECC}
+```{r plot ECC}
 ggplot(newAmazon100, aes(x=year.of.publication, y=Average)) +
   geom_line()+
   expand_limits(y=0)
