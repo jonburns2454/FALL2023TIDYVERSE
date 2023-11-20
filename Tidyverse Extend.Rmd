@@ -1,0 +1,76 @@
+---
+title: "Tidyverse Extend Assignment"
+author: "Saloua Daouki"
+date: "2023-11-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction:
+
+The goal of this assignment is to Extend an Existing Example. Using one of my classmate's examples (as created in the tidyverse CREATE assignment), extend his or her example with additional annotated code.
+
+The example I pick to extend on is Carol's; Carol chose to create tidyverse on a dataset that "offers an in-depth look into Amazon's top 100 Bestselling books along with their customer reviews." [Carol Campbell's Tidyverse CREATE Assignment](https://raw.githubusercontent.com/acatlin/FALL2023TIDYVERSE/main/carol_campbell_tidyverse_part1.Rmd)
+
+Throughout this .RMD document, I am going to write next to each heading or code whether it is Existing Code (EC) or Extended Existing Code (EEC)
+
+## Loading Librairies **(EC)**:
+
+```{r echo = FALSE}
+library(tidyverse)
+library(kableExtra)
+```
+
+## Import the data **(EC)**:
+
+```{r}
+data <- read.csv("https://raw.githubusercontent.com/carolc57/Data607-Fall23/main/Amazon%20top%20100%20Trending%20Books.csv", header = TRUE, sep = ",")
+
+amazon100 <-as.data.frame(data)
+
+kable(head(amazon100, n = 5))  #show 10 rows only
+```
+
+
+## Grouping the data **(EEC)**:
+
+What I tried to do here was to combine all functions in one R chunk. First, to filter by the year of publication -to focus on the years after Covid. Then, find the mean price of the books of each year to be able to compare how much the price had grown between 2020 and 2023. I also added a column to calculate the difference price between each two consecutive years.
+
+```{r}
+Amazon_postCovid <-filter(amazon100, year.of.publication=="2020"|year.of.publication=="2021"|year.of.publication=="2022"|year.of.publication=="2023") %>%
+  group_by(year.of.publication)%>%
+  summarise(Average = mean(book.price))%>%
+  mutate(priceGrowth = Average-lag(Average))
+head(Amazon_postCovid)
+```
+
+The price had grown by more than 7 USD  between 2020 and 2023. But by looking at the price growth column, we can see that the price grew by a little over 11 USD from 2020 to 2021. Then it dropped by about 8 USD between 2021 and 2022, then it grew by over 4 USD the next year. Let's apply the same code on the entire dataset: 
+
+```{r new data ECC}
+newAmazon100 <- amazon100 %>%
+  group_by(year.of.publication)%>%
+  summarise(Average = mean(book.price))%>%
+  mutate(priceGrowth = Average-lag(Average))
+head(newAmazon100)
+```
+
+## Visualize the data:
+
+To better visualize the price growth, we can plot a line graph:
+
+```{r plot ECC}
+ggplot(newAmazon100, aes(x=year.of.publication, y=Average)) +
+  geom_line()+
+  expand_limits(y=0)
+```
+
+Based on the line plot, we can see that, before 1998, the prices of the books were up and down but still less than 10 USD. The year of 2000 has the highest pick of all, the price was over 25 USD. Then, the prices went down and up again but not as high as 25 USD.
+
+## Conclusion:
+
+All tools in the librairies in the package tidyverse are very useful to tidy, manipulate and visualize the data. They either can be used individually (one tool each time, which can make the document longer), or they can be combined in only few R chunks. To be able to work with combined tools in R, I need to acquire and practice more on working with R.
+
+
