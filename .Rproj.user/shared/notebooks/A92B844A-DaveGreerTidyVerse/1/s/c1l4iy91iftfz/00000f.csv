@@ -1,0 +1,7 @@
+"0","# Added a title to make the purpose of this chart more clear."
+"0","# Added a classic theme."
+"0",""
+"0","cars<-na.omit(cars)"
+"0","ggplot(cars, aes(x = engine_capacity, fill=transmission)) + "
+"0","  geom_histogram(bins = 50)+labs(y=""Number of Transmissions"", x=""Engine Size"", title = ""Distribution of Engine Sizes by Transmission Type"") +"
+"0","  theme_classic() "

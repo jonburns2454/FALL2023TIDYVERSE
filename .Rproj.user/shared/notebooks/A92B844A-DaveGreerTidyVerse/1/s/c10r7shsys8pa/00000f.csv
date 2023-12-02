@@ -1,0 +1,12 @@
+"0","# Removed ""cars2<-cars%>%group_by(year_produced)"" as this grouping is covered in the aesthetic mapping"
+"0","# Added a title to make the purpose of this chart more clear."
+"0","# Added a classic theme."
+"0","# Made the line thicker."
+"0",""
+"0",""
+"0","ggplot(data = cars, aes(x = year_produced, y = body_type, color = body_type)) + "
+"0","  geom_line(size = 1.5) + "
+"0","  labs(x = ""Year"", y = ""Body Type"", title = ""Body Types Over the Years"") + "
+"0","  theme_classic() "
+"2","Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+Please use `linewidth` instead."
