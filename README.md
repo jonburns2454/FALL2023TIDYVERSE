@@ -66,6 +66,10 @@ Initial Description and Link:
 Data File:
 * https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/guns-polls.csv
 
+### Extension of stringr from Molly's assignment: str_locate(), str_split_fixed(), and str_glue()
+Initial Description and Link:
+* Demonstrates how to use str_locate(), str_split_fixed(), and str_glue() to modify strings in a data frame.
+* https://github.com/acatlin/FALL2023TIDYVERSE/blob/main/julia_ferris_extend.Rmd
 
 # Marley Myrianthopoulos
 ### dplyr, select, filter, arrange
