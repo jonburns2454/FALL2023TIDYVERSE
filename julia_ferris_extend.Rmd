@@ -1,0 +1,181 @@
+---
+title: "DATA 607 Tidyverse EXTEND"
+author: "Julia Ferris"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+# Introduction
+
+This entire first part was created by Molly Siebecker. I extended the project in the second part of this document.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# stringr
+
+The stringr package in the Tidyverse contains multiple functions that are useful for working with character strings. Below are examples of a few of these functions (str_to_lower, str_length, str_sort, str_detect, and str_count) and how they might be used with the babynames data set in base r. 
+
+```{r}
+library(babynames)
+library(stringr)
+library(dplyr)
+data("babynames")
+```
+
+## str_to_lower
+
+The str_to_lower function converts all characters in a string to lowercase (and, conversely, the str_to_upper function converts all characters to uppercase.) Here we overwrite the "name" column to convert each name to lowercase, which would be useful for analysis and detecting patterns.
+```{r}
+babynames <- babynames %>%
+  mutate(name = str_to_lower(name))
+```
+
+## str_length
+
+Suppose you wanted to analyze how longer or shorter names have gone in and out of fashion over the years, you could start by creating a new variable for the length of each name, which can be extracted from the "name" column using str_length.
+```{r}
+babynames <- babynames %>%
+  mutate(name_length = str_length(name))
+```
+
+## str_sort
+
+For a comprehensive list of the names in the data set, you could use str_sort to alphabetize the names.
+```{r}
+sorted_names <- babynames %>%
+  distinct(name) %>%
+  pull(name) %>%
+  str_sort()
+```
+
+## str_detect
+
+str_detect is used to detect a pattern match, but it returns a logical vector instead of the match itself. This makes it useful for filtering a data frame. For example, you could filter for girls' names that end in "a" by using str_detect with a regex.
+```{r}
+girls_names_end_a <- babynames %>%
+  filter(sex == "F") %>%
+  filter(str_detect(name, "a$"))
+```
+
+You could also, for example, look for names that contain at least one sequence of at least two of the same letter:
+```{r}
+double_letter <- babynames %>%
+  filter(str_detect(name, "(.)\\1"))
+```
+
+## str_count
+
+str_count returns the number of times that a pattern appears within a string. So if you wanted to track the frequency with which the letter "a" appears in girls' names, you could first create a new variable using str_count.
+```{r}
+girls_names_a <- babynames %>%
+  filter(sex == "F") %>%
+  mutate(a_freq = str_count(name, "a"))
+```
+If we had not used str_to_lower earlier, str_count would have missed "a" when it started a name, based on the way we wrote the regex.
+
+# Conclusion
+
+These are only a few of the functions available in stringr, and they have only been used with single words. Stringr functions can also be used with more complex text with punctuation and white space (there are specific functions for dealing with whitespace in text.) There are also groups of functions in stringr that are useful for mutating strings and joining/concatenating strings.  
+
+# Extension by Julia Ferris
+
+The following sections will show more functions in the package stringr. The functions used include str_locate(), str_split_fixed(), and str_glue().
+
+## str_locate()
+
+All girl names that contained "eigh" were added to a list. Then, I found the location of that pattern in all 766 names by using the str_locate() function. It returns the location of the first character of the pattern and the last character of the pattern. In all the names, only 14 different locations of the pattern existed. This shows how similar all the names were.
+
+```{r str-locate}
+girls_names_pattern_eigh <-
+  girls_names_a |>
+  filter(str_detect(name, "eigh"))
+
+patternLoc <- c()
+
+for (name in unique(girls_names_pattern_eigh$name))
+{
+  # Find the locations of the eigh pattern in names with that pattern
+  newloc <- str_locate(name, "eigh")
+  patternLoc <- rbind(patternLoc, newloc)
+}
+
+length(patternLoc)
+
+length(unique(patternLoc))
+```
+
+## str_split_fixed()
+
+I wanted to use that pattern to split names by the pattern "eigh" to specify the start and end of names. I did this fith the str_split_fixed function to modify the existing data frame. I wanted to see how often the beginning of the names was the same and how often the ending of the names was the same. As it turns out, the beginning of the names varied much more than the endings of these names.
+
+```{r str-split}
+girls_names_pattern_eigh[c('First Part', 'Last Part')] <- str_split_fixed(girls_names_pattern_eigh$name, "eigh", 2)
+
+length(unique(girls_names_pattern_eigh$`First Part`))
+length(unique(girls_names_pattern_eigh$`Last Part`))
+```
+
+## str_glue()
+
+I recreated a story with some of the baby boy names from the list that start with J to show how str_glue() works. I found the story at this website: https://englishluv.com/paragraph-stories/ The story was the seventh one on the page. I used 3 random J names for the story.
+
+```{r new-story, R.options = list(width = 200)}
+boy_names <- babynames |>
+  filter(sex == "M") |>
+  filter(str_detect(name, "^j"))
+
+newStory <- str_glue(
+  "A lion named {name1} lived in a den.
+  ",
+  "A mouse named {name2} also lived in a 
+  ",
+  "hole nearby. One day, {name1} was sleeping.
+  ",
+  "{name2} was running up and down. By chance, 
+  ",
+  "the mouse got into the nostril of the lion. 
+  ",
+  "The lion woke up. He was very angry. He caught 
+  ",
+  "the mouse with his paws and was about to kill 
+  ",
+  "it. {name1} prayed for mercy. He said that it might 
+  ",
+  "be of use to him in the future. The lion laughed 
+  ",
+  "at the small mouse and let it go. ",
+  "
+  ",
+  "
+  ",
+  "After some days the lion was caught in {name3} 
+  ",
+  "the hunter's net. He could not tear the net. So 
+  ",
+  "he began to roar. {name2} could know {name1} from
+  ",
+  "his roar. {name2} went there without losing time 
+  ",
+  "and gnawed into the net. He said, “O king of beasts.
+  ",
+  "I have cut into the net. Now run away for your life.
+  ",
+  "I have been able to do a good turn to you.” {name1} 
+  ",
+  "was glad and ran away.",
+  name1 = str_to_title(boy_names$name[20]),
+  name2 = str_to_title(boy_names$name[60]),
+  name3 = str_to_title(boy_names$name[120])
+)
+
+newStory
+```
+
+## New Conclusion
+
+Again, these are only some of the functions in stringr that are useful. R has many other applications of these functions and other functions in the package. I hope you can apply these examples to other situations and continue learning about the functions.
