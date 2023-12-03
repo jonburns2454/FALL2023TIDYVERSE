@@ -101,6 +101,7 @@ Initial description and link:
 
 # Fomba Kassoh - Tidyverse Extend Assignment
 Extended the the code on dplyr and ggplot2 provided by Souleymane Doumbia. I have added the following extensions to his vignette
+https://github.com/hawa1983/FALL2023TIDYVERSE/blob/main/Souleymane_Tidyverse_Create.Rmd
 ## dplyr vignette
 I used various dplyr functions to demonstrated/described their use in summarizing and analysing the spotify data.
 * Use of the 'arrange' function to sort data frame on a columns.
