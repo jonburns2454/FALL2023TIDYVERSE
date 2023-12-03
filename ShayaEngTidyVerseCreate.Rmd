@@ -69,6 +69,107 @@ ggplot(filtered_data, aes(x = Year, y = ratio_column, fill = AgeGroup)) +
 
 ## Conclusion
 
+JONATHAN BURNS TIDY EXTEND ASSIGNMENT:
+
 There does seem to be an increase in life expectancy over the last 70+ years. The ratio of people dyeing in their 80s relative to dying younger than that is constantly going up over the observed data.
 
 Almost all of what I did in this entire project used functions from packages part of the tidyverse ecosystem.
+
+
+---
+title: "TIDY-Extend"
+author: "Jonathan Burns"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+In this version of the TIDY assignment I will strive to show some more capabilites of the packages within GGPLOT. For this I will be building off Shaya's original CREATE assignment in GitHub.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidyquant)
+library(scales)
+```
+
+Using this KAGGLE String of code that pulls data driectly from the FRED database making it so much easier to aggregate economic data into R.
+Source:https://www.kaggle.com/code/samarpratap/us-economy-data
+Plotly: https://plotly.com/r/line-charts/
+
+
+
+```{r}
+fred_raw <- tq_get(c("RSXFSN",  # Advance retail sales
+                     "GDPC1",  # GDP
+                     "ICSA",  # Initial unemployment claims
+                     "FPCPITOTLZGUSA",  # Inflation
+                     "UNRATE",  # Unemployment rate
+                     "USREC",   # Recessions
+                     "BOPGSTB",#Trade Balance: Goods and Services,Balance of Payments Basis
+                     "BOPTEXP",#Export of Goods and Services,Balance of Payment Basis
+                     "BOPTIMP",#Import of Goods and Services,Balance of Payment Basis
+                     "UMCSENT",#Consumer Sentiment
+                     "PERMIT",#Housing Starts and Building Permits
+                     "PI",#Personal Income
+                     "PCE",#Personal Consumption Expenditures
+                     "DGORDER",#Manufacturers' New Orders: Durable Goods
+                     "T10Y2Y",#10-Year Treasury Constant Maturity Minus 2-Year Treasury Constant Maturity
+                     "TCU",#Capacity Utilization: Total Industry
+                     "INDPRO"),#Industrial Production Index
+                   get = "economic.data",  # Use FRED
+                   from = "1990-01-01")
+```
+#Recession
+
+
+Lets say we want a unemployment growth rate function, we can use built in tidyverse functions to  do so.
+In this case, imbedding a lag function within a mutate will do the trick. This is also an opportunity show the filter function.
+
+Now we have a new variable calulating the monthly rate of change of the unemployment rate from 1990 through 10/1/2023.
+```{r}
+fred_raw_2 <- fred_raw %>% 
+    filter(symbol == "UNRATE") %>% 
+    mutate(un_rate_gr = price - lag(price))
+
+head(fred_raw_2)
+```
+
+```{r}
+summary(fred_raw_2)
+```
+We can also use locational numbers to rename out data so it makes sense in context with our new variable
+
+```{r}
+fred_raw_2 <- fred_raw_2 %>% 
+    rename("unemp_rate" = 3) %>% 
+    select(2,3,4)
+```
+
+
+
+Now that unemployment growth rate has been caclulated we can graph it. However instead of using GGPLOT I wanted to try my hand at plotly, a popular package in Python.
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+```
+ 
+```{r}
+fred_raw_2 <- fred_raw_2 %>% 
+    rename("fgr" = 3)
+
+
+fred_un_rate <- plot_ly(fred_raw_2, x = date, y = un_rate_gr, type = "scatter", mode = "lines")
+```
+
+```{r}
+fred_raw_2 %>% 
+    plot_ly(x = ~date, y = ~fgr, type = "scatter", mode = "lines") %>% 
+    layout(title = "Historical Growth Rates of Unemployment ", 
+           xaxis = list(title = ("5 Year Span")), 
+           yaxis = list(title = ("Unemployment Rate Percent Change")))
+```
+
+Plotly is great because it naturally generates interactive plot without having to program it in, plut I really like the x and y axis scaling abilities. While I know much more about GGPLOT, it seems like plotly can step in where GGPLOT has shortcomings.
+
