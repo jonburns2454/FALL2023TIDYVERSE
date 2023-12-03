@@ -1,0 +1,7 @@
+"0","# Added a title to make the purpose of this chart more clear."
+"0","# Added a classic theme."
+"0",""
+"0","ggplot(cars, aes(engine_type,price_usd, fill =body_type)) +"
+"0","  geom_boxplot() +"
+"0","  labs(x=""Engine Type"", y=""Price in USD"", title = ""Price Distribution by Engine Type and Body Type"") +"
+"0","  theme_classic() "

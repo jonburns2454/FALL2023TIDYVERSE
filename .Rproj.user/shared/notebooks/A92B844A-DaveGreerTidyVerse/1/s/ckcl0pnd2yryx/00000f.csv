@@ -1,0 +1,4 @@
+"0","options(scipen=999)"
+"0","cars = read_csv(""https://raw.githubusercontent.com/greerda/Data607/main/cars.csv"",show_col_types = FALSE) %>%"
+"0","  as.data.frame() "
+"0","cars<-na.omit(cars)"
