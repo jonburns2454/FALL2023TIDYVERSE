@@ -83,4 +83,152 @@ summarising_data
 In the example above, we use these functions to calculate the average 'loudness' for each 'playlist_genre' within the 'spotify_data' dataset. The 'group_by()' function clusters the data by each unique genre, setting the stage for the calculation of summary statistics within each group. Then, 'summarize()' is applied to compute the mean 'loudness' across these groups, while 'na.rm = TRUE' ensures that missing values do not affect the calculation.
 The resulting object, 'summarising_data', contains the average loudness values neatly organized by genre, providing an immediate snapshot of this particular attribute across different genres.
 
+
+## 4 This extension of Souleymane's vinnete is by Fomba Kassoh
+
+### Arranging tracks by loudness
+You can also use the dyply package to arrange tracks by loudness using the 'arrange' function
+```{r arrange tracks by loudness}
+library(dplyr)
+
+loud_tracks <- spotify_data %>% 
+  arrange(desc(loudness))
+
+head(loud_tracks)
+
+```
+
+### Counting tracks in each playlist genre
+If you want to know how many tracts are in each genre, you can use the 'count' function
+
+```{r counting tracts in each genre}
+genre_counts <- spotify_data %>% count(playlist_genre)
+
+head(genre_counts)
+```
+### Filtering tracks that are outliers in terms of duration (using IQR)
+One of the common data reshaping tasks involves filtering out outliers. You can use the inter-quantile range to filter out outliers.
+```{r}
+spotify_data_no_outliers <- spotify_data %>% 
+  filter(between(duration_ms, quantile(duration_ms, 0.25) - 1.5 * IQR(duration_ms),
+                               quantile(duration_ms, 0.75) + 1.5 * IQR(duration_ms)))
+head(spotify_data_no_outliers)
+```
+### Normalizing audio feature columns (like loudness and tempo) to have a comparison scale
+In statistical analysis, you may be required to compare two variables that have difference measurement base. To do that, you must first normalize/standardize the data. You can achieve that using the following dplyr functions:
+
+**mutate_at():** This is a dplyr function used to apply a given function to multiple columns in the dataframe.
+**vars(loudness, tempo):** The vars() function is used here to specify the columns on which the function within mutate_at() will be applied. In this case, it's being applied to the 'loudness' and 'tempo' columns.
+**~scale(.):** The tilde (~) introduces a formula, which is a way of writing anonymous functions in R. The dot (.) is a placeholder for the columns specified in vars(). scale() is a base R function that standardizes a numeric vector to have a mean of zero and a standard deviation of one. It performs z-score normalization.
+**%>% as.vector:** This chain within the mutate_at() function takes the output of scale()—which is a matrix—and converts it back to a vector with as.vector(). This is because scale() returns a matrix with attributes for the scaled center and scale, but here we want just the scaled values as regular columns in the dataframe.
+**select:** The select function selects columns of interest.
+```{r}
+normalized_spotify_data <- spotify_data %>% 
+  mutate_at(vars(loudness, tempo), ~scale(.) %>% as.vector) %>%
+  select(track_name, loudness, tempo)
+
+head(normalized_spotify_data)
+```
+### Grouping data and applying a function within each group
+In data analysis, you are sometimes required to generate a summary statistic with each group in a column. You can use group_by and apply a function independently to each group. Below is an example:
+
+**group_by:** This function groups the data by the playlist_genre column, which means that subsequent operations will be performed on these groups independently.
+**top_n:** This function is used to select the top n entries for each group created by group_by(). In this case, it selects the top 5 tracks with the longest duration within each genre.
+
+```{r grouping data and apply functions to within each group}
+top_tracks_by_genre <- spotify_data %>% 
+  group_by(playlist_genre) %>% 
+  top_n(5, duration_ms) %>%
+  select(track_name, playlist_genre, duration_ms)
+
+head(top_tracks_by_genre)
+```
+### Transforming the data frame from the wide format to the long format
+The pivot_longer transformation took the selected numerical columns from the Spotify dataset and converted them into two columns: attribute and value. This "long" format is useful for certain types of analysis and visualization where you want to treat these attributes uniformly. For example, after this transformation, you could easily plot all these attributes' values against another variable without having to deal with separate columns.
+
+***Note:*** The pivot_longer function is in the tidyr not the dplyr package but these packages are often used together because they complement each other's functionalities. Here, I am using it to help with visualizing the data.
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+
+
+# Select numerical columns for the transformation
+numerical_columns <- c('danceability', 'energy', 'key', 'loudness', 
+                       'speechiness', 'acousticness', 'instrumentalness', 
+                       'liveness', 'valence', 'tempo')
+
+# Perform the pivot_longer operation
+pivot_longer_df <- spotify_data %>% 
+  pivot_longer(cols = numerical_columns, 
+               names_to = "attribute", 
+               values_to = "value")
+
+head(pivot_longer_df)
+```
+### Visualizations
+Now that we have transformed the data from wide format to long format, let use use the long data frame to visualize the data. Here I am focusing on the plots that are most frequently used in statistical analysis. 
+
+#### Box Plot
+This will show the distribution of each numerical attribute. Box plots are valuable in data analysis for concisely representing the distribution of a data set, highlighting its median, quartiles, and outliers. They provide a clear visual summary of the central tendency, variability, and extremes in the data.
+
+```{r}
+library(ggplot2)
+
+ggplot(pivot_longer_df, aes(x = attribute, y = value)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Distribution of Numerical Attributes", x = "Attribute", y = "Value")
+
+```
+#### Histograms of Numerical Attributes
+This will create a facet grid of histograms for each attribute. Histograms are essential in data analysis for visualizing the distribution of numerical data, identifying patterns and outliers, comparing multiple data sets, and understanding their spread and central tendencies. They offer a straightforward way to analyze and gain insights from numerical data.
+
+```{r}
+ggplot(pivot_longer_df, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black") +
+  facet_wrap(~ attribute, scales = "free") +
+  labs(title = "Histograms of Numerical Attributes", x = "Value", y = "Count")
+
+```
+#### Density Plots of Numerical Attributes
+This will show the density distribution for each attribute.Density plots are used in data analysis to visualize the distribution and density of continuous data, offering a smooth representation of data variation and identifying where values are concentrated. They provide a clear and continuous view of data distribution, useful for understanding underlying patterns and trends.
+
+```{r}
+ggplot(pivot_longer_df, aes(x = value, fill = attribute)) +
+  geom_density(alpha = 0.7) +
+  facet_wrap(~ attribute, scales = "free") +
+  labs(title = "Density Plots of Numerical Attributes", x = "Value", y = "Density")
+
+```
+#### Bar Plot of Average Values of Attributes
+This will display the average values of each attribute.Bar plots are used in data analysis to visually represent categorical data, showing the frequency or proportion of categories through the height or length of bars, making it easy to compare different categories or groups within a dataset.
+
+```{r}
+library(dplyr)
+
+pivot_longer_df %>%
+  group_by(attribute) %>%
+  summarise(average_value = mean(value, na.rm = TRUE)) %>%
+  ggplot(aes(x = attribute, y = average_value, fill = attribute)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Average Values of Numerical Attributes", x = "Attribute", y = "Average Value")
+
+```
+#### Explaination of the ggplot functions used
+**ggplot():** This is the core function in ggplot2, used to initialize a ggplot object. It sets up the data and specifies the set of mappings from data to aesthetics. 
+**geom_ functions:** These functions add layers to the plot, specifying how to display the data. Some common geom_* functions include:
+
+geom_point(): Adds points to the plot, useful for scatter plots.
+geom_density(): Adds lines, great for time series or trend lines.
+geom_bar(): Creates bar plots.
+geom_histogram(): Plots a histogram for data distribution.
+geom_boxplot(): Creates boxplots to show distributions with quartiles.
+
+**aes():** This function is used to specify the aesthetic mappings, like mapping variables to x and y axes, color, fill, etc.
+**facet_wrap() and facet_grid():** These functions are used for creating faceted plots, allowing you to split one plot into multiple plots based on a factor or combination of factors.
+**labs():** Used to add or modify labels for the plot, including titles, axis labels, legends, etc.
+**theme():** This function is used to customize the non-data components of your plot, like the plot background, grid lines, text, etc.
+
 * * *

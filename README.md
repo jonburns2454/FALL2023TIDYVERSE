@@ -107,5 +107,22 @@ Initial description and link:
 
 * Data source: https://ourworldindata.org/life-expectancy
 * The csv files are loaded in my GitHub repository
-=======
-=======
+
+
+# Fomba Kassoh - Tidyverse Extend Assignment
+Extended the the code on dplyr and ggplot2 provided by Souleymane Doumbia. I have added the following extensions to his vignette
+https://github.com/hawa1983/FALL2023TIDYVERSE/blob/main/Souleymane_Tidyverse_Create.Rmd
+## dplyr vignette
+I used various dplyr functions to demonstrated/described their use in summarizing and analysing the spotify data.
+* Use of the 'arrange' function to sort data frame on a columns.
+* Demostrate the use of the 'count' function to count number of tracks in each genre.
+* Filtering tracks that are outliers in terms of duration (using IQR).
+* Normalizing audio feature columns (like loudness and tempo) to have a comparison scale. 
+* Grouping data and applying a function within each group.
+* Using the tidyr function pivot_longer to transform the data frame from the wide format to the long format for visualizations.
+
+## ggplot2
+Extended the demonstratration/description of the ggplot2 package for visualizations
+* Provided the code and explained the use of Box Plot, Histogram, Density Plot, and Bar Plot in data visualization and analysis.
+* Provided an explaination of each of the ggplot functions used.
+
